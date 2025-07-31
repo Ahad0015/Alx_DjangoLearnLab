@@ -1,11 +1,10 @@
-import os
 from pathlib import Path
 
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your_secret_key_here'
+SECRET_KEY = 'django-insecure-CHANGE_ME'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -20,8 +19,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    'relationship_app',  # ✅ Your custom app
+    'relationship_app',  # your app
 ]
 
 MIDDLEWARE = [
@@ -78,14 +76,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Language and timezone
+# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
