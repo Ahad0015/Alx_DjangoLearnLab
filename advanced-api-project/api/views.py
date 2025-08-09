@@ -103,3 +103,41 @@ filter_backends = [
 filterset_fields = ['title', 'author', 'publication_year']
 search_fields = ['title', 'author']
 ordering_fields = ['title', 'publication_year']
+
+from rest_framework import generics, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from .models import Book
+from .serializers import BookSerializer
+
+class BookListView(generics.ListCreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter
+    ]
+
+    # Filtering options
+    filterset_fields = ['title', 'author__name', 'publication_year']
+
+    # Searching options
+    search_fields = ['title', 'author__name']
+
+    # Ordering options
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title']  # default ordering
+
+"""
+BookListView provides list and create operations for books.
+
+Features:
+- Filtering by title, author name, and publication year.
+- Searching by title and author name.
+- Ordering by title and publication year.
+
+Example queries:
+    /api/books/?author__name=John
+    /api/books/?search=python
+    /api/books/?ordering=-publication_year
+"""
