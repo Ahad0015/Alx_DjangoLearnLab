@@ -1,116 +1,10 @@
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework import generics, permissions
-from .models import Book
-from .serializers import BookSerializer
-
-
-# ======================
-#  Book Generic Views
-# ======================
-
-class BookListView(generics.ListAPIView):
-    """
-    GET /books/
-    Returns a list of all books.
-    Accessible to everyone (read-only).
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]  # Public read access
-
-
-class BookDetailView(generics.RetrieveAPIView):
-    """
-    GET /books/<pk>/
-    Returns details for a specific book by its ID.
-    Accessible to everyone (read-only).
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
-
-
-class BookCreateView(generics.CreateAPIView):
-    """
-    POST /books/
-    Creates a new book entry.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        """
-        Hook to handle extra logic before saving.
-        """
-        serializer.save()
-
-
-class BookUpdateView(generics.UpdateAPIView):
-    """
-    PUT/PATCH /books/<pk>/
-    Updates an existing book.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class BookDeleteView(generics.DestroyAPIView):
-    """
-    DELETE /books/<pk>/
-    Deletes a book by ID.
-    Requires authentication.
-    """
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework import generics
-
-class BookUpdateView(generics.UpdateAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  # or custom permission
-
-class BookDeleteView(generics.DestroyAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAdminUser]  # only admins can delete
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-from rest_framework import generics
-from .models import Book
-from .serializers import BookSerializer
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
-
-class BookListCreateView(generics.ListCreateAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]  
-    # Allow anyone to read, but only authenticated users can create
-
-class BookUpdateView(generics.UpdateAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  
-    # Only authenticated users can update
-
-class BookDeleteView(generics.DestroyAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticated]  
-    # Only authenticated users can delete (you can restrict further if needed)
-
 from rest_framework import generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Book
 from .serializers import BookSerializer
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+import django_filters
 
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
@@ -131,113 +25,81 @@ class BookListView(generics.ListAPIView):
 
     # Optional: default ordering
     ordering = ['title']
-filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-filterset_fields = ['title', 'author', 'publication_year']
 
-from django_filters import rest_framework as filters
-from rest_framework.filters import SearchFilter, OrderingFilter
-
-from django_filters import rest_framework as filters
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+    from rest_framework import generics, filters
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
 from .models import Book
 from .serializers import BookSerializer
+
+class BookListCreateView(generics.ListCreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]  # Read-only for unauthenticated, create allowed if authenticated
+
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['title', 'author', 'publication_year']  # Allow filtering by these fields
+    search_fields = ['title', 'author']  # Enable search on title and author
+    ordering_fields = ['publication_year', 'title']  # Allow ordering by these fields
+
+class BookRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]  # Only authenticated users can update or delete
+
+
+
+from rest_framework import generics, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .models import Book
+from .serializers import BookSerializer
+
 
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['title', 'author', 'publication_year']
-    search_fields = ['title', 'author']
+    filter_backends = [
+        DjangoFilterBackend,
+        OrderingFilter,
+        SearchFilter
+    ]
+    filterset_fields = ['publication_year', 'author__name']
     ordering_fields = ['title', 'publication_year']
-    ordering = ['title']  # default ordering
-# Add these imports at the top
-from django_filters import rest_framework as filters
-from rest_framework.filters import SearchFilter, OrderingFilter
+    search_fields = ['title', 'author__name']
 
-# Add these to your BookListView class:
-filter_backends = [filters.DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+class BookDetailView(generics.RetrieveAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+
+class BookCreateView(generics.CreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class BookUpdateView(generics.UpdateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class BookDeleteView(generics.DestroyAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+    from django_filters import rest_framework as django_filters
+from rest_framework import filters
+
+filter_backends = [
+    django_filters.DjangoFilterBackend,
+    filters.OrderingFilter,
+    filters.SearchFilter,
+]
+
+# Example: enable filtering, searching, and ordering
 filterset_fields = ['title', 'author', 'publication_year']
 search_fields = ['title', 'author']
 ordering_fields = ['title', 'publication_year']
-ordering = ['title']
-
-# api/views.py
-
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Book
-from .serializers import BookSerializer
-
-class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['title', 'author', 'publication_year']
-    search_fields = ['title', 'author']
-    ordering_fields = ['title', 'publication_year']
-    ordering = ['title']  # default ordering
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Book
-from .serializers import BookSerializer
-
-class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['title', 'author', 'publication_year']
-    search_fields = ['title', 'author']
-    ordering_fields = ['title', 'publication_year']
-    ordering = ['title']  # default ordering
-from django_filters import rest_framework as filters
-filter_backends = [filters.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter]
-
-from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
-from rest_framework.filters import SearchFilter
-filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
-from rest_framework.filters import SearchFilter
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Book
-from .serializers import BookSerializer
-
-class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    filterset_fields = ['title', 'author', 'publication_year']
-    search_fields = ['title', 'author']
-    ordering_fields = ['title', 'publication_year']
-    ordering = ['title']
-from django_filters.rest_framework import DjangoFilterBackend, OrderingFilter
-from rest_framework.filters import SearchFilter
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Book
-from .serializers import BookSerializer
-
-class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    filterset_fields = ['title', 'author', 'publication_year']
-    search_fields = ['title', 'author']
-    ordering_fields = ['title', 'publication_year']
-    ordering = ['title']
