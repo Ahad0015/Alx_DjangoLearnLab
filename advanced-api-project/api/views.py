@@ -141,3 +141,25 @@ Example queries:
     /api/books/?search=python
     /api/books/?ordering=-publication_year
 """
+from rest_framework import generics, permissions
+from .models import Book
+from .serializers import BookSerializer
+
+class BookListCreateView(generics.ListCreateAPIView):
+    """
+    GET: List all books
+    POST: Create a new book (authenticated users only)
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+class BookRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET: Retrieve a single book by ID
+    PUT/PATCH: Update a book (authenticated users only)
+    DELETE: Delete a book (authenticated users only)
+    """
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
