@@ -14,9 +14,23 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
 
+
+
+
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework.authtoken.views import obtain_auth_token
+
+# Root URL config for the project
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # API endpoints for tasks
+    path('api/', include('tasks.urls')),
+
+    # Token auth endpoint for DRF
+    path('api/auth/token/', obtain_auth_token, name='api-token'),
+
+    # path('api/auth/register/', ...)  # TODO: Add signup endpoint later
 ]
