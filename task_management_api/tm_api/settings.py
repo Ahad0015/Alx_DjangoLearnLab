@@ -130,3 +130,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+INSTALLED_APPS = [
+    # other apps...
+    'django_filters',
+]
+
