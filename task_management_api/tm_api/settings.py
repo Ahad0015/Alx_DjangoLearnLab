@@ -33,18 +33,19 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+    'django.contrib.contenttypes',  # <-- THIS IS MISSING
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party
+     # Third-party
     'rest_framework',            # DRF is awesome
     'rest_framework.authtoken',  # Token-based auth
-
-    # Local apps (our custom stuff)
-    'tasks',  
+    
+    # Your apps
+    'tm_api',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -122,16 +123,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # DRF defaults
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    ],
+    ),
 }
+
 
 INSTALLED_APPS = [
     # other apps...
     'django_filters',
 ]
+
 
