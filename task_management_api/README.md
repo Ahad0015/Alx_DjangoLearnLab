@@ -4,6 +4,18 @@ A Django REST Framework (DRF) project for managing tasks with authentication and
 
 ---
 
+## 📑 Table of Contents
+1. [Introduction](#introduction)  
+2. [Features](#features)  
+3. [Installation](#installation)  
+4. [Usage](#usage)  
+5. [API Endpoints](#api-endpoints)  
+6. [Updates & Notes](#updates--notes)  
+7. [License](#license)
+
+---
+
+
 ## 🚀 Features
 - User registration and authentication (JWT)
 - Create, Read, Update, and Delete (CRUD) tasks
