@@ -15,22 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
-
-
-
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.authtoken.views import obtain_auth_token
 
-# Root URL config for the project
+# Root URLConf (kind of the entry point for all routes)
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # Django's built-in admin site
+    path("admin/", admin.site.urls),
 
-    # API endpoints for tasks
-    path('api/', include('tasks.urls')),
+    # My tasks app (probably where most stuff will go for now)
+    path("", include("tasks.urls")),   # maybe should namespace this later?
 
-    # Token auth endpoint for DRF
-    path('api/auth/token/', obtain_auth_token, name='api-token'),
+    # Auth routes (login/logout/password mgmt)
+    # NOTE: might customize these templates later...
+    path("accounts/", include("django.contrib.auth.urls")),
 
-    # path('api/auth/register/', ...)  # TODO: Add signup endpoint later
+    # path("debug/", include("debug_toolbar.urls")),  # leaving this here in case I need it
 ]

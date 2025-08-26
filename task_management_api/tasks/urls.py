@@ -1,15 +1,12 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import TaskViewSet
+from django.urls import path
+from django.shortcuts import render
 
-# Using DRF's DefaultRouter so I don't have to manually write all the CRUD routes
-router = DefaultRouter()
-router.register(r'tasks', TaskViewSet, basename='task')   # not sure if I really need basename here, but leaving it
+# Just a quick home view here instead of making a views.py for now
+def home(request):
+    # Could add some context later if I need to pass data to the template
+    return render(request, "home.html")
 
 urlpatterns = [
-    # This will include all the router-generated URLs under the root
-    path('', include(router.urls)),
-
-    # TODO: might add some extra custom endpoints here later (e.g. stats or reports)
-    # path('tasks/stats/', TaskStatsView.as_view()),  # leaving as a reminder
+    path("", home, name="home"),   # main landing page
+    # path("about/", about, name="about"),  # might add this later
 ]
