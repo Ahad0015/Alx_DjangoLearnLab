@@ -1,12 +1,12 @@
 from django.urls import path
-from django.shortcuts import render
-
-# Just a quick home view here instead of making a views.py for now
-def home(request):
-    # Could add some context later if I need to pass data to the template
-    return render(request, "home.html")
+from django.contrib.auth import views as auth_views
+from . import views
 
 urlpatterns = [
-    path("", home, name="home"),   # main landing page
-    # path("about/", about, name="about"),  # might add this later
+    path('', views.home, name='home'),
+
+    # Auth Views (built-in Django)
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='home'), name='logout'),
 ]
+

@@ -50,8 +50,8 @@ import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
+        'DIRS': [],  # leave empty if templates live inside apps
+        'APP_DIRS': True,   # must be True
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -62,6 +62,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 
 WSGI_APPLICATION = 'tm_api.wsgi.application'
