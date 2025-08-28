@@ -18,17 +18,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-# Root URLConf (kind of the entry point for all routes)
 urlpatterns = [
-    # Django's built-in admin site
     path("admin/", admin.site.urls),
 
-    # My tasks app (probably where most stuff will go for now)
-    path("", include("tasks.urls")),   # maybe should namespace this later?
+    # HTML UI (home)
+    path("", include("tasks.urls")),
 
-    # Auth routes (login/logout/password mgmt)
-    # NOTE: might customize these templates later...
-    path("accounts/", include("django.contrib.auth.urls")),
-
-    # path("debug/", include("debug_toolbar.urls")),  # leaving this here in case I need it
+    # API endpoints
+    path("api/", include("api.urls")),          # /api/register/, /api/token/...
+    path("api/", include("tasks.api_urls")),    # /api/tasks/ (DRF router)
 ]
+
+
+
