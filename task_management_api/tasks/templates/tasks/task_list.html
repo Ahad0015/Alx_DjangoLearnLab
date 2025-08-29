@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Your Tasks</h2>
+{% if tasks %}
+<ul>
+  {% for t in tasks %}
+    <li>
+      <strong>{{ t.title }}</strong>
+      {% if t.completed %}(done){% endif %}<br>
+      {{ t.description|default:"" }}<br>
+      Due: {{ t.due_date|default:"-" }}<br>
+      <a href="{% url 'task_update' t.pk %}">Edit</a>
+      <a href="{% url 'task_delete' t.pk %}">Delete</a>
+    </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No tasks yet. <a href="{% url 'task_create' %}">Create one</a></p>
+{% endif %}
+{% endblock %}

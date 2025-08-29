@@ -1,16 +1,12 @@
-
 from django.contrib import admin
 from .models import Task
 
-@admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    # Display these columns in the admin list view
-    list_display = ('id', 'title', 'owner', 'status', 'due_date', 'created_at')
+    list_display = ("title", "description", "completed", "due_date", "created_at")
+    list_filter = ("completed", "due_date")
+    search_fields = ("title", "description")
 
-    # Quick filters on the right-hand side
-    list_filter = ('status',)  # could also filter by owner if needed
+admin.site.register(Task, TaskAdmin)
 
-    # Searchable fields
-    search_fields = ('title', 'description', 'owner__username')
 
    

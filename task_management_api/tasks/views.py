@@ -1,74 +1,90 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
 from .models import Task
 from .forms import TaskForm
 
 
+# Show all tasks for the logged-in user
+@login_required
+def task_list(request):
+    # filtering by user explicitly — could’ve used related_name but meh
+    user_tasks = Task.objects.filter(owner=request.user).order_by("-created_at")
+
+    # might later paginate this if list grows too big
+    return render(request, "tasks/task_list.html", {
+        "tasks": user_tasks,
+        "page_title": "My Tasks"   # not really needed but feels nice
+    })
+
+
+# Create a new task (basic form handling)
 @login_required
 def task_create(request):
-    # Handles creating a new task
     if request.method == "POST":
-        # Honestly, I usually re-check this twice because I sometimes forget commit=False
-        form = TaskForm(request.POST or None)
+        form = TaskForm(request.POST)
         if form.is_valid():
-            new_task = form.save(commit=False)  # don’t save to DB yet
-            new_task.user = request.user        # attach the user manually
-            new_task.save()
-            # I might want to redirect to a detail page later, but for now just home
-            return redirect("home")
+            task_obj = form.save(commit=False)  # need this to attach owner
+            task_obj.owner = request.user
+            task_obj.save()
+            # maybe add a success message later with django.contrib.messages
+            return redirect("task_list")
     else:
-        # if not POST, just show the empty form
         form = TaskForm()
 
-    # using a dictionary explicitly (even though inline would work)
-    ctx = {"form": form}
-    return render(request, "tasks/task_form.html", ctx)
+    return render(request, "tasks/task_form.html", {
+        "form": form,
+        "title": "Create Task"
+    })
 
 
+# Edit an existing task (only if it belongs to the user)
 @login_required
 def task_update(request, pk):
-    # This fetches the task but also ensures it belongs to the user
-    task_obj = get_object_or_404(Task, pk=pk, user=request.user)
+    task_item = get_object_or_404(Task, pk=pk, owner=request.user)
 
     if request.method == "POST":
-        form = TaskForm(request.POST, instance=task_obj)
+        form = TaskForm(request.POST, instance=task_item)
         if form.is_valid():
-            updated_task = form.save(commit=False)
-            updated_task.save()   # kinda redundant since save() already works directly
-            return redirect("home")
+            form.save()
+            return redirect("task_list")
     else:
-        form = TaskForm(instance=task_obj)
+        form = TaskForm(instance=task_item)
 
-    return render(request, "tasks/task_form.html", {"form": form})
+    # note: same template as create — could separate them but not worth it yet
+    return render(request, "tasks/task_form.html", {
+        "form": form,
+        "title": "Update Task"
+    })
 
 
+# Confirm & delete a task
 @login_required
 def task_delete(request, pk):
-    # NOTE: maybe add a check for permissions later if needed
-    task_to_remove = get_object_or_404(Task, pk=pk, user=request.user)
+    task_entry = get_object_or_404(Task, pk=pk, owner=request.user)
 
     if request.method == "POST":
-        task_to_remove.delete()
-        # Could use reverse_lazy instead of 'home' string, but this is fine
-        return redirect("home")
-
-    # I like passing the object itself so the template can show its title
-return render(request, "tasks/task_confirm_delete.html", {"task": task_to_remove})
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Task
-
-@login_required
-def task_delete(request, pk):
-    task = get_object_or_404(Task, pk=pk, user=request.user)
-    if request.method == "POST":
-        task.delete()
+        task_entry.delete()
         return redirect("task_list")
-    return render(request, "tasks/task_confirm_delete.html", {"task": task})
+
+    # using a separate confirm template just to be safe
+    return render(request, "tasks/task_confirm_delete.html", {
+        "task": task_entry
+    })
 
 
+# Simple registration view (maybe move to accounts app later?)
+def register(request):
+    if request.method == "POST":
+        signup_form = UserCreationForm(request.POST)
+        if signup_form.is_valid():
+            new_user = signup_form.save()
+            auth_login(request, new_user)   # logs them in immediately
+            return redirect("task_list")
+    else:
+        signup_form = UserCreationForm()
 
-
-
+    return render(request, "registration/register.html", {
+        "form": signup_form
+    })

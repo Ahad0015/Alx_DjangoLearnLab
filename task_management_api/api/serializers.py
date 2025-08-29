@@ -1,39 +1,33 @@
-# api/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Task
 
-# Serializer for registering new users
-# TODO: Might add password confirmation later (double-check before saving)
+
+# serializer for user signup (probably will tweak later for profile stuff)
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)  # don't expose this in API response
+    # making password write-only so it doesn’t leak out in responses
+    password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password']  # kept it explicit, just in case
+        # not sure if I actually need email here, but keeping it for now
+        fields = ["id", "username", "email", "password"]
 
+    # overriding create so we hash the password properly
     def create(self, validated_data):
-        # Using create_user so it hashes the password
-        # NOTE: If we ever add more fields, remember to update here
+        # grabbing fields explicitly instead of unpacking for clarity
+        uname = validated_data.get("username")
+        mail = validated_data.get("email", "")
+        pwd = validated_data["password"]
+
+        # NOTE: using create_user ensures password is hashed
         user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email', ''),  # fallback if email is missing
-            password=validated_data['password']
+            username=uname,
+            email=mail,
+            password=pwd
         )
-        # print(f"DEBUG: Created user {user.username}")  # for testing only
+
+        # might need to send welcome email here later... (not yet)
         return user
 
-
-# Serializer for Task model
-class TaskSerializer(serializers.ModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')  # show username, not ID
-
-    class Meta:
-        model = Task
-        # NOTE: 'completed' field implies a boolean, but check model definition to be sure
-        fields = [
-            'id', 'title', 'description', 'completed',
-            'due_date', 'owner'
-        ]
-        # Possibly add read_only_fields=['owner'] later if we restrict updates
+   
 
