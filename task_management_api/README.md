@@ -4,6 +4,12 @@ A Django REST Framework (DRF) project for managing tasks with authentication and
 
 ---
 
+Introduction
+The **Task Management API** is a Django-based project that allows users to register, log in, and manage their daily tasks.  
+It provides a clean web interface along with REST API endpoints, making it easy to integrate with other applications.  
+This project was built as part of a capstone to demonstrate backend development skills, authentication, and CRUD functionality.
+
+
 ## 📑 Table of Contents
 1. [Introduction](#introduction)  
 2. [Features](#features)  
